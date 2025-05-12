@@ -1,4 +1,7 @@
 package model;
+
+
+
 public class Application {
     private int id;
     private int userId;
@@ -9,12 +12,21 @@ public class Application {
     private String company;
 
     // Constructor
-    public Application(int userId, int jobId, String status, String jobTitle, String company) {
+    public Application(int userId, int jobId, String jobTitle, String status, String company) {
         this.userId = userId;
         this.jobId = jobId;
-        this.status = status;
         this.jobTitle = jobTitle;
+        this.status = status;
         this.company = company;
+    }
+
+    // Constructor for applying (4 parameters)
+    public Application(int userId, int jobId, String userName, String status) {
+        this.userId = userId;
+        this.jobId = jobId;
+        this.jobTitle = userName;  // reuse the same field
+        this.status = status;
+        this.company = null; // not used here
     }
 
 

@@ -5,8 +5,6 @@ package model;
 import java.sql.Date; // Only import java.sql.Date
 
 
-import java.sql.Date; // Only import java.sql.Date
-
 public class Job {
     private int id;
     private String title;
@@ -73,6 +71,11 @@ public class Job {
 
     public void setDeadline(Date deadline) {
         this.deadline = deadline;
+    }
+
+    @Override
+    public String toString() {
+        return "Job ID: " + id + ", Job Title: " + title + ", Company: " + company + ", Role Required: " + roleRequired + ", Deadline: " + deadline;
     }
 
 

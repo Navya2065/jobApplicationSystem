@@ -60,4 +60,36 @@ public class JobBST {
         else
             return searchRecursive(node.right, title);
     }
+    public Job delete(String title) {
+        root = deleteRecursive(root, title.toLowerCase());
+        return null;
+    }
+
+    private JobNode deleteRecursive(JobNode root, String title) {
+        if (root == null) return null;
+
+        int cmp = title.compareTo(root.job.getTitle().toLowerCase());
+        if (cmp < 0) {
+            root.left = deleteRecursive(root.left, title);
+        } else if (cmp > 0) {
+            root.right = deleteRecursive(root.right, title);
+        } else {
+            if (root.left == null) return root.right;
+            if (root.right == null) return root.left;
+
+            Job minLargerNode = findMin(root.right);
+            root.job = minLargerNode;
+            root.right = deleteRecursive(root.right, minLargerNode.getTitle().toLowerCase());
+        }
+
+        return root;
+    }
+
+    private Job findMin(JobNode node) {
+        while (node.left != null) {
+            node = node.left;
+        }
+        return node.job;
+    }
+
 }

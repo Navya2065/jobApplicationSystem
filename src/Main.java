@@ -1,81 +1,91 @@
 import java.sql.*;  // Make sure to import java.sql.Date
 import java.sql.Date;
 import java.util.*;
+
 import util.DBConnection;
 import model.*;
 import dao.*;
 
-
-
 public class Main {
-   public static void main(String[] args) {
+    public static void main(String[] args) {
         try (Connection conn = DBConnection.getConnection()) {
             Scanner scanner = new Scanner(System.in);
             UserDAO userDAO = new UserDAO(conn);
             JobDAO jobDAO = new JobDAO(conn);
             ApplicationDAO appDAO = new ApplicationDAO(conn);
 
-            // Initialize JobBST
-            JobBST jobBST = new JobBST();
-            // Initialize AdminHistory to store application history
-            AdminHistory adminHistory = new AdminHistory();
+            JobBST jobBST = new JobBST(); // For job search
+            AdminHistory adminHistory = new AdminHistory(); // For admin logs
 
-            // Step 1: Login (email and password)
-            System.out.println("Enter your email: ");
-            String email = scanner.nextLine();
-            System.out.println("Enter your password: ");
-            String password = scanner.nextLine();
+            // Ask for role first
+            System.out.println("Do you want to login as 'user' or 'admin'?");
+            String role = scanner.nextLine().trim().toLowerCase();
 
-            // Check for hardcoded admin credentials
-            if (email.equals("admin@example.com") && password.equals("admin123")) {
-                // Admin login
-                User currentUser = new User(0, "Admin", email, password, "admin");
-                System.out.println("Login successful as Admin!");
-                adminMenu(scanner, jobDAO, appDAO, currentUser, jobBST, adminHistory, conn);  // Pass conn here
-                return;
-            }
+            if (role.equals("admin")) {
+                // Admin login with hardcoded credentials
+                System.out.println("Enter admin email: ");
+                String email = scanner.nextLine();
+                System.out.println("Enter admin password: ");
+                String password = scanner.nextLine();
 
-            // Check if the user exists in the database for user login
-            User currentUser = userDAO.getUserByEmail(email);
-            if (currentUser == null) {
-                // If the user does not exist, give the option to create a new user
-                System.out.println("No account found with this email. Would you like to create a new account? (yes/no)");
-                String createAccount = scanner.nextLine();
-
-                if (createAccount.equalsIgnoreCase("yes")) {
-                    System.out.println("Enter your name: ");
-                    String name = scanner.nextLine();
-                    System.out.println("Enter your password: ");
-                    String newPassword = scanner.nextLine();
-
-                    // Create a new user and add to the database
-                    User newUser = new User(0, name, email, newPassword, "user");
-                    userDAO.createUser(newUser);  // Assuming createUser() method in UserDAO
-                    System.out.println("Account created successfully! Please login now.");
-
-                    // Call login again after successful user creation
-                    return; // Restart the login process
+                if (email.equals("admin@example.com") && password.equals("admin123")) {
+                    User admin = new User(0, "Admin", email, password, "admin");
+                    System.out.println("Login successful as Admin!");
+                    adminMenu(scanner, jobDAO, appDAO, admin, jobBST, adminHistory, conn);
                 } else {
-                    System.out.println("Exiting...");
-                    return; // Exit the program if user doesn't want to create an account
+                    System.out.println("Invalid admin credentials. Exiting...");
                 }
+
+            } else if (role.equals("user")) {
+                // User login or registration
+                System.out.println("Enter your email: ");
+                String email = scanner.nextLine();
+                System.out.println("Enter your password: ");
+                String password = scanner.nextLine();
+
+                User currentUser = userDAO.getUserByEmail(email);
+
+                if (currentUser == null) {
+                    System.out.println("No account found. Would you like to register? (yes/no)");
+                    String registerChoice = scanner.nextLine();
+
+                    if (registerChoice.equalsIgnoreCase("yes")) {
+                        System.out.println("Enter your name: ");
+                        String name = scanner.nextLine();
+                        System.out.println("Create a password: ");
+                        String newPassword = scanner.nextLine();
+
+                        User newUser = new User(0, name, email, newPassword, "user");
+                        userDAO.createUser(newUser);
+                        System.out.println("Account created successfully! Please restart the application to login.");
+                        return;
+                    } else {
+                        System.out.println("Exiting...");
+                        return;
+                    }
+
+                } else {
+                    // Check password
+                    if (!currentUser.getPassword().equals(password)) {
+                        System.out.println("Incorrect password. Exiting...");
+                        return;
+                    }
+
+                    System.out.println("Login successful! Welcome, " + currentUser.getName());
+
+                    // Load jobs into BST
+                    List<Job> jobs = jobDAO.getAllJobs();
+                    for (Job job : jobs) {
+                        jobBST.insert(job);
+                    }
+
+                    userMenu(scanner, jobDAO, appDAO, currentUser, jobBST);
+                }
+
+            } else {
+                System.out.println("Invalid role selection. Please restart and enter 'user' or 'admin'.");
             }
 
-            if (!currentUser.getPassword().equals(password)) {
-                System.out.println("Invalid credentials. Exiting...");
-                return;
-            }
-
-            System.out.println("Login successful! Welcome, " + currentUser.getName());
-
-            // Fetch all jobs and insert them into the BST
-            List<Job> jobs = jobDAO.getAllJobs();
-            for (Job job : jobs) {
-                jobBST.insert(job);  // Insert jobs into BST
-            }
-
-            // Display menu for user
-            userMenu(scanner, jobDAO, appDAO, currentUser, jobBST);  // Pass jobBST
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -90,7 +100,8 @@ public class Main {
             System.out.println("2. View All Jobs");
             System.out.println("3. Manage Job Application (Accept/Reject)");
             System.out.println("4. View Application History");
-            System.out.println("5. Exit");
+            System.out.println("5. Delete a Job");
+            System.out.println("6. Exit");
 
             int choice = scanner.nextInt();
             scanner.nextLine();  // Consume newline
@@ -121,19 +132,21 @@ public class Main {
                     }
                     break;
 
+
                 case 2:
                     // View All Jobs
                     List<Job> jobs;
                     try {
-                        jobs = jobDAO.getAllJobs();
+                        jobs = jobDAO.getAllJobs();  // Fetch all jobs for admin
                         System.out.println("\nAll Jobs:");
                         for (Job job : jobs) {
-                            System.out.println("ID: " + job.getId() + ", Title: " + job.getTitle());
+                            System.out.println(job);  // Will automatically call toString() to print job details
                         }
                     } catch (SQLException e) {
                         System.out.println("Error fetching jobs: " + e.getMessage());
                     }
                     break;
+
 
                 case 3:
                     // Manage Job Application (Accept/Reject)
@@ -155,9 +168,7 @@ public class Main {
                         adminHistory.addEntry("User" + userId, jobTitle, companyName, status);
                         System.out.println("History updated successfully.");
 
-                        // Push a notification to the user
-                        NotificationManager.pushNotification(userId, "Your job application for job ID " + jobId + " has been " + status + ".");
-                        System.out.println("Notification sent to user.");
+
 
                     } catch (SQLException e) {
                         System.out.println("Error updating status: " + e.getMessage());
@@ -168,8 +179,25 @@ public class Main {
                     // View Application History
                     adminHistory.showHistory();
                     break;
-
                 case 5:
+                    System.out.println("Enter Job ID to delete: ");
+                    int deleteJobId = scanner.nextInt();
+                    scanner.nextLine(); // consume newline
+
+                    try {
+                        boolean deleted = jobDAO.deleteJobById(deleteJobId);
+                        if (deleted) {
+                            System.out.println("Job deleted successfully!");
+                        } else {
+                            System.out.println("Job ID not found.");
+                        }
+                    } catch (SQLException e) {
+                        System.out.println("Error deleting job: " + e.getMessage());
+                    }
+                    break;
+
+
+                case 6:
                     // Exit
                     System.out.println("Exiting admin menu...");
                     return;
@@ -187,33 +215,39 @@ public class Main {
             System.out.println("1. View Available Jobs");
             System.out.println("2. Apply for a Job");
             System.out.println("3. Your Applications");
-            System.out.println("4. View Notifications");
-            System.out.println("5. Search Jobs by Title");
-            System.out.println("6. Exit");
+            System.out.println("4. Search Jobs by Title");
+            System.out.println("5. Exit");
 
             int choice = scanner.nextInt();
             scanner.nextLine();  // Consume newline
 
             switch (choice) {
                 case 1:
-                    // View Available Jobs
-                    List<Job> availableJobs;
+                    List<Job> jobs;
                     try {
-                        availableJobs = jobDAO.getAvailableJobs();
-                        System.out.println("\nAvailable Jobs:");
-                        for (Job job : availableJobs) {
-                            System.out.println("ID: " + job.getId() + ", Title: " + job.getTitle());
+                        jobs = jobDAO.getAllJobs();  // Fetch all jobs for admin
+                        System.out.println("\nAll Jobs:");
+                        for (Job job : jobs) {
+                            System.out.println(job);  // Will automatically call toString() to print job details
                         }
                     } catch (SQLException e) {
-                        System.out.println("Error fetching available jobs: " + e.getMessage());
+                        System.out.println("Error fetching jobs: " + e.getMessage());
                     }
                     break;
+
 
                 case 2:
                     // Apply for a Job
                     System.out.println("Enter Job ID to apply for: ");
                     int jobIdToApply = scanner.nextInt();
-                    Application newApplication = new Application(currentUser.getId(), jobIdToApply, "Job Title Here", "Applied", "Company Name");
+                    scanner.nextLine();  // Consume newline
+
+                    Application newApplication = new Application(
+                            currentUser.getId(),
+                            jobIdToApply,
+                            currentUser.getName(),
+                            "Applied"
+                    );
 
                     try {
                         appDAO.applyForJob(newApplication);
@@ -241,13 +275,9 @@ public class Main {
                     }
                     break;
 
-                case 4:
-                    // View notifications
-                    System.out.println("=== Your Notifications ===");
-                    NotificationManager.peekNotifications(currentUser.getId());
-                    break;
 
-                case 5:
+
+                case 4:
                     // Search Jobs using BST
                     System.out.println("Enter the job title you are looking for: ");
                     String searchTitle = scanner.nextLine();
@@ -260,7 +290,7 @@ public class Main {
                     }
                     break;
 
-                case 6:
+                case 5:
                     // Exit
                     System.out.println("Exiting user menu...");
                     return;
