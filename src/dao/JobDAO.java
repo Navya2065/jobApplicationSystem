@@ -50,44 +50,7 @@ public class JobDAO {
         return jobs;
     }
 
-    public List<Job> getAvailableJobs() throws SQLException {
-        String sql = "SELECT * FROM jobs WHERE deadline >= CURDATE()";
-        List<Job> jobs = new ArrayList<>();
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                Job job = new Job(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getString("company"),
-                        rs.getString("role_required"),
-                        rs.getDate("deadline")
-                );
-                jobs.add(job);
-            }
-        }
-        return jobs;
-    }
 
-    public Job getJobById(int jobId) throws SQLException {
-        String query = "SELECT * FROM jobs WHERE id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, jobId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new Job(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getString("company"),
-                        rs.getString("role_required"),
-                        rs.getDate("deadline")
-                );
-            }
-        }
-        return null;
-    }
 
     public boolean deleteJobById(int jobId) throws SQLException {
         // Step 1: Delete applications related to the job
@@ -97,7 +60,7 @@ public class JobDAO {
             stmt.executeUpdate(); // even if no rows, it's okay
         }
 
-        // Step 2: Delete the job itself
+
         String deleteJobSql = "DELETE FROM jobs WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(deleteJobSql)) {
             stmt.setInt(1, jobId);
@@ -116,16 +79,16 @@ public class JobDAO {
         List<Application> applications = new ArrayList<>();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, jobId);  // Pass the jobId as a parameter
+            stmt.setInt(1, jobId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 Application application = new Application(
                         rs.getInt("user_id"),
                         rs.getInt("job_id"),
-                        rs.getString("job_title"),  // Job Title
-                        rs.getString("status"),     // Application Status
-                        rs.getString("company")     // Company Name
+                        rs.getString("job_title"),
+                        rs.getString("status"),
+                        rs.getString("company")
                 );
                 applications.add(application);
             }

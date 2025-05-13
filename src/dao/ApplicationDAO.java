@@ -12,7 +12,7 @@ public class ApplicationDAO {
         this.conn = conn;
     }
 
-    // Method to update application status
+
     public void updateApplicationStatus(int userId, int jobId, String status) throws SQLException {
         String sql = "UPDATE applications SET status = ? WHERE user_id = ? AND job_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -29,15 +29,15 @@ public class ApplicationDAO {
     }
 
     public void applyForJob(Application application) throws SQLException {
-        String sql = "INSERT INTO applications (user_id, job_id, user_name, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO applications (user_id, job_id,status) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, application.getUserId());
             stmt.setInt(2, application.getJobId());
-            stmt.setString(3, application.getUserName());
-            stmt.setString(4, application.getStatus());
+            stmt.setString(3, application.getStatus());
             stmt.executeUpdate();
         }
     }
+
 
     public List<Application> getApplicationsByUser(int userId) throws SQLException {
         List<Application> applications = new ArrayList<>();
@@ -86,6 +86,7 @@ public class ApplicationDAO {
             }
         }
     }
+
 
 }
 

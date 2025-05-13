@@ -1,17 +1,13 @@
 package model;
-
-
-
 public class Application {
     private int id;
     private int userId;
     private int jobId;
-    private String userName;  // New field for user's name
+    private String userName;
     private String status;
     private String jobTitle;
     private String company;
 
-    // Constructor
     public Application(int userId, int jobId, String jobTitle, String status, String company) {
         this.userId = userId;
         this.jobId = jobId;
@@ -20,18 +16,16 @@ public class Application {
         this.company = company;
     }
 
-    // Constructor for applying (4 parameters)
+
     public Application(int userId, int jobId, String userName, String status) {
         this.userId = userId;
         this.jobId = jobId;
-        this.jobTitle = userName;  // reuse the same field
+        this.jobTitle = userName;
         this.status = status;
-        this.company = null; // not used here
+        this.company = null;
     }
 
 
-
-    // Getters and setters
     public int getId() {
         return id;
     }

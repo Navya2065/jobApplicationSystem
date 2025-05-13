@@ -10,7 +10,7 @@ public class UserDAO {
         this.conn = conn;
     }
 
-    // Create a new user (register user)
+
     public int createUser(User user) throws SQLException {
         String sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -22,15 +22,15 @@ public class UserDAO {
 
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                return rs.getInt(1);  // Return the generated user ID
+                return rs.getInt(1);
             }
         }
-        return -1;  // In case of failure
+        return -1;
     }
 
 
 
-    // User login (fetch user by email)
+
     public User getUserByEmail(String email) {
         String query = "SELECT * FROM users WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -43,6 +43,6 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null; // Return null if user not found
+        return null;
     }
 }

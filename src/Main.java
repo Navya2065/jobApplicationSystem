@@ -1,4 +1,4 @@
-import java.sql.*;  // Make sure to import java.sql.Date
+import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 
@@ -14,15 +14,16 @@ public class Main {
             JobDAO jobDAO = new JobDAO(conn);
             ApplicationDAO appDAO = new ApplicationDAO(conn);
 
-            JobBST jobBST = new JobBST(); // For job search
-            AdminHistory adminHistory = new AdminHistory(); // For admin logs
+            JobBST jobBST = new JobBST();
+            AdminHistory adminHistory = new AdminHistory();
 
-            // Ask for role first
-            System.out.println("Do you want to login as 'user' or 'admin'?");
+
+
+  System.out.println("Do you want to login as 'user' or 'admin'?");
             String role = scanner.nextLine().trim().toLowerCase();
 
             if (role.equals("admin")) {
-                // Admin login with hardcoded credentials
+
                 System.out.println("Enter admin email: ");
                 String email = scanner.nextLine();
                 System.out.println("Enter admin password: ");
@@ -37,7 +38,7 @@ public class Main {
                 }
 
             } else if (role.equals("user")) {
-                // User login or registration
+
                 System.out.println("Enter your email: ");
                 String email = scanner.nextLine();
                 System.out.println("Enter your password: ");
@@ -58,14 +59,14 @@ public class Main {
                         User newUser = new User(0, name, email, newPassword, "user");
                         userDAO.createUser(newUser);
                         System.out.println("Account created successfully! Please restart the application to login.");
-                        return;
+
                     } else {
                         System.out.println("Exiting...");
-                        return;
+
                     }
 
                 } else {
-                    // Check password
+
                     if (!currentUser.getPassword().equals(password)) {
                         System.out.println("Incorrect password. Exiting...");
                         return;
@@ -73,7 +74,7 @@ public class Main {
 
                     System.out.println("Login successful! Welcome, " + currentUser.getName());
 
-                    // Load jobs into BST
+
                     List<Job> jobs = jobDAO.getAllJobs();
                     for (Job job : jobs) {
                         jobBST.insert(job);
@@ -91,8 +92,6 @@ public class Main {
         }
     }
 
-
-    // Admin menu handling
     private static void adminMenu(Scanner scanner, JobDAO jobDAO, ApplicationDAO appDAO, User currentUser, JobBST jobBST, AdminHistory adminHistory, Connection conn) {
         while (true) {
             System.out.println("\nAdmin Menu:");
@@ -105,11 +104,10 @@ public class Main {
             System.out.println("7. Exit");
 
             int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
-
+            scanner.nextLine();
             switch (choice) {
                 case 1:
-                    // Add Job
+
                     System.out.println("Enter Job Title: ");
                     String title = scanner.nextLine();
                     System.out.println("Enter Job Description: ");
@@ -121,7 +119,7 @@ public class Main {
                     System.out.println("Enter Job Deadline (yyyy-mm-dd): ");
                     String deadline = scanner.nextLine();
 
-                    // Create new job and add to database
+
                     Job newJob = new Job(0, title, description, company, roleRequired, Date.valueOf(deadline));
                     try {
                         jobDAO.createJob(newJob);
@@ -132,10 +130,10 @@ public class Main {
                         System.out.println("Error adding job: " + e.getMessage());
                     }
                     break;
-                case 2:  // View Applied Jobs for a specific job
+                case 2:
                     System.out.println("Enter Job ID to view applied users: ");
                     int jobId = scanner.nextInt();
-                    scanner.nextLine();  // Consume newline
+                    scanner.nextLine();
 
                     try {
                         List<Application> applications = jobDAO.getAppliedJobs(jobId);
@@ -158,13 +156,13 @@ public class Main {
 
 
                 case 3:
-                    // View All Jobs
+
                     List<Job> jobs;
                     try {
-                        jobs = jobDAO.getAllJobs();  // Fetch all jobs for admin
+                        jobs = jobDAO.getAllJobs();
                         System.out.println("\nAll Jobs:");
                         for (Job job : jobs) {
-                            System.out.println(job);  // Will automatically call toString() to print job details
+                            System.out.println(job);
                         }
                     } catch (SQLException e) {
                         System.out.println("Error fetching jobs: " + e.getMessage());
@@ -173,7 +171,7 @@ public class Main {
 
 
                 case 4:
-                    // Manage Job Application (Accept/Reject)
+
                     System.out.println("Enter User ID of the applicant: ");
                     int userId = scanner.nextInt();
                     System.out.println("Enter Job ID for the application: ");
@@ -182,7 +180,7 @@ public class Main {
                     String status = scanner.next();
 
                     try {
-                        // Update application status in the database
+
                         appDAO.updateApplicationStatus(userId, jobId, status);
 
                         String jobTitle = appDAO.getJobTitle(jobId);
@@ -199,15 +197,16 @@ public class Main {
                     }
                     break;
 
+
                 case 5:
-                    // View Application History
+
                     adminHistory.showHistory();
                     break;
                 case 6:
-                    //delete
+
                     System.out.println("Enter Job ID to delete: ");
                     int deleteJobId = scanner.nextInt();
-                    scanner.nextLine(); // consume newline
+                    scanner.nextLine();
 
                     try {
                         boolean deleted = jobDAO.deleteJobById(deleteJobId);
@@ -223,7 +222,7 @@ public class Main {
 
 
                 case 7:
-                    // Exit
+
                     System.out.println("Exiting admin menu...");
                     return;
 
@@ -233,7 +232,7 @@ public class Main {
         }
     }
 
-    // User menu handling
+
     private static void userMenu(Scanner scanner, JobDAO jobDAO, ApplicationDAO appDAO, User currentUser, JobBST jobBST) {
         while (true) {
             System.out.println("\nUser Menu:");
@@ -244,16 +243,16 @@ public class Main {
             System.out.println("5. Exit");
 
             int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
+            scanner.nextLine();
 
             switch (choice) {
                 case 1:
                     List<Job> jobs;
                     try {
-                        jobs = jobDAO.getAllJobs();  // Fetch all jobs for admin
+                        jobs = jobDAO.getAllJobs();
                         System.out.println("\nAll Jobs:");
                         for (Job job : jobs) {
-                            System.out.println(job);  // Will automatically call toString() to print job details
+                            System.out.println(job);
                         }
                     } catch (SQLException e) {
                         System.out.println("Error fetching jobs: " + e.getMessage());
@@ -262,7 +261,7 @@ public class Main {
 
 
                 case 2:
-                    // Apply for a Job
+
                     System.out.println("Enter Job ID to apply for: ");
                     int jobIdToApply = scanner.nextInt();
                     scanner.nextLine();  // Consume newline
@@ -283,7 +282,7 @@ public class Main {
                     break;
 
                 case 3:
-                    // View your applications
+
                     System.out.println("=== Your Applications ===");
                     try {
                         List<Application> userApps = appDAO.getApplicationsByUser(currentUser.getId());
@@ -300,10 +299,7 @@ public class Main {
                     }
                     break;
 
-
-
                 case 4:
-                    // Search Jobs using BST
                     System.out.println("Enter the job title you are looking for: ");
                     String searchTitle = scanner.nextLine();
 
@@ -316,7 +312,7 @@ public class Main {
                     break;
 
                 case 5:
-                    // Exit
+
                     System.out.println("Exiting user menu...");
                     return;
 

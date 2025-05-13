@@ -1,10 +1,5 @@
 package model;
-
-
-
-import java.sql.Date; // Only import java.sql.Date
-
-
+import java.sql.Date;
 public class Job {
     private int id;
     private String title;
@@ -13,9 +8,6 @@ public class Job {
     private String roleRequired;
     private Date deadline;
 
-   
-
-    // Constructor
     public Job(int id, String title, String description, String company, String roleRequired, Date deadline) {
         this.id = id;
         this.title = title;
@@ -25,7 +17,7 @@ public class Job {
         this.deadline = deadline;
     }
 
-    // Getters and Setters (if needed)
+
     public int getId() {
         return id;
     }

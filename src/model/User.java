@@ -1,7 +1,4 @@
 package model;
-
-
-
 public class User {
     private int id;
     private String name;
@@ -9,7 +6,7 @@ public class User {
     private String password;
     private String role;
 
-    // Constructor
+
     public User(int id, String name, String email, String password, String role) {
         this.id = id;
         this.name = name;
@@ -18,7 +15,6 @@ public class User {
         this.role = role;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }

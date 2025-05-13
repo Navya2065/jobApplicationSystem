@@ -2,9 +2,9 @@ package dao;
 import model.*;
 // Node Class for BST
 class JobNode {
-    Job job;          // Job object
-    JobNode left;     // Left child
-    JobNode right;    // Right child
+    Job job;
+    JobNode left;
+    JobNode right;
 
     public JobNode(Job job) {
         this.job = job;
@@ -13,7 +13,7 @@ class JobNode {
     }
 }
 
-// Binary Search Tree Class for Job
+
 public class JobBST {
     private class JobNode {
         Job job;
