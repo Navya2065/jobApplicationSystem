@@ -13,6 +13,7 @@ public class Job {
     private String roleRequired;
     private Date deadline;
 
+   
 
     // Constructor
     public Job(int id, String title, String description, String company, String roleRequired, Date deadline) {

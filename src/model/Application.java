@@ -30,6 +30,7 @@ public class Application {
     }
 
 
+
     // Getters and setters
     public int getId() {
         return id;

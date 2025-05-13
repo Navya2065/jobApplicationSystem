@@ -1,6 +1,8 @@
 package dao;
 import java.sql.*;
 import java.util.*;
+
+import model.Application;
 import model.Job;
 
 public class JobDAO {
@@ -88,11 +90,48 @@ public class JobDAO {
     }
 
     public boolean deleteJobById(int jobId) throws SQLException {
-        String sql = "DELETE FROM jobs WHERE id = ?";  // ✅ Corrected line
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        // Step 1: Delete applications related to the job
+        String deleteApplicationsSql = "DELETE FROM applications WHERE job_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(deleteApplicationsSql)) {
+            stmt.setInt(1, jobId);
+            stmt.executeUpdate(); // even if no rows, it's okay
+        }
+
+        // Step 2: Delete the job itself
+        String deleteJobSql = "DELETE FROM jobs WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(deleteJobSql)) {
             stmt.setInt(1, jobId);
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         }
     }
+
+    public List<Application> getAppliedJobs(int jobId) throws SQLException {
+        String sql = "SELECT a.user_id, a.job_id, u.name AS user_name, j.title AS job_title, a.status, j.company " +
+                "FROM applications a " +
+                "JOIN users u ON a.user_id = u.id " +
+                "JOIN jobs j ON a.job_id = j.id " +
+                "WHERE a.job_id = ?";
+
+        List<Application> applications = new ArrayList<>();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, jobId);  // Pass the jobId as a parameter
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Application application = new Application(
+                        rs.getInt("user_id"),
+                        rs.getInt("job_id"),
+                        rs.getString("job_title"),  // Job Title
+                        rs.getString("status"),     // Application Status
+                        rs.getString("company")     // Company Name
+                );
+                applications.add(application);
+            }
+        }
+
+        return applications;
+    }
+
 }

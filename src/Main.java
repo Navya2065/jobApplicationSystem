@@ -97,11 +97,12 @@ public class Main {
         while (true) {
             System.out.println("\nAdmin Menu:");
             System.out.println("1. Add a Job");
-            System.out.println("2. View All Jobs");
-            System.out.println("3. Manage Job Application (Accept/Reject)");
-            System.out.println("4. View Application History");
-            System.out.println("5. Delete a Job");
-            System.out.println("6. Exit");
+            System.out.println("2. View Applied Jobs by the Users");
+            System.out.println("3. View All Jobs");
+            System.out.println("4. Manage Job Application (Accept/Reject)");
+            System.out.println("5. View Application History");
+            System.out.println("6. Delete a Job");
+            System.out.println("7. Exit");
 
             int choice = scanner.nextInt();
             scanner.nextLine();  // Consume newline
@@ -131,9 +132,32 @@ public class Main {
                         System.out.println("Error adding job: " + e.getMessage());
                     }
                     break;
+                case 2:  // View Applied Jobs for a specific job
+                    System.out.println("Enter Job ID to view applied users: ");
+                    int jobId = scanner.nextInt();
+                    scanner.nextLine();  // Consume newline
+
+                    try {
+                        List<Application> applications = jobDAO.getAppliedJobs(jobId);
+                        if (applications.isEmpty()) {
+                            System.out.println("No applications for this job.");
+                        } else {
+                            for (Application app : applications) {
+                                System.out.println("User ID: " + app.getUserId() +
+                                        ", Job Title: " + app.getJobTitle() +
+                                        ", Job ID: "+app.getJobId()+
+                                        ", Company: " + app.getCompany() +
+                                        ", Status: " + app.getStatus());
+                            }
+
+                        }
+                    } catch (SQLException e) {
+                        System.out.println("Error fetching applications: " + e.getMessage());
+                    }
+                    break;
 
 
-                case 2:
+                case 3:
                     // View All Jobs
                     List<Job> jobs;
                     try {
@@ -148,12 +172,12 @@ public class Main {
                     break;
 
 
-                case 3:
+                case 4:
                     // Manage Job Application (Accept/Reject)
                     System.out.println("Enter User ID of the applicant: ");
                     int userId = scanner.nextInt();
                     System.out.println("Enter Job ID for the application: ");
-                    int jobId = scanner.nextInt();
+                     jobId = scanner.nextInt();
                     System.out.println("Enter new status (Accepted/Rejected): ");
                     String status = scanner.next();
 
@@ -175,11 +199,12 @@ public class Main {
                     }
                     break;
 
-                case 4:
+                case 5:
                     // View Application History
                     adminHistory.showHistory();
                     break;
-                case 5:
+                case 6:
+                    //delete
                     System.out.println("Enter Job ID to delete: ");
                     int deleteJobId = scanner.nextInt();
                     scanner.nextLine(); // consume newline
@@ -197,7 +222,7 @@ public class Main {
                     break;
 
 
-                case 6:
+                case 7:
                     // Exit
                     System.out.println("Exiting admin menu...");
                     return;
